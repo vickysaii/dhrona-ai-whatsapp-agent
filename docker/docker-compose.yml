@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # 1. FastAPI Backend API
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: whatsapp_agent_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - ../.env
+    depends_on:
+      - redis
+    restart: always
+
+  # 2. Redis Memory Store
+  redis:
+    image: redis:7-alpine
+    container_name: whatsapp_agent_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  redis_data:
