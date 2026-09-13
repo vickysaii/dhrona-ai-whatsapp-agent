@@ -17,6 +17,9 @@ backend/.venv/
 .env.*
 backend/.env
 backend/.env.*
+!.env.example
+!backend/.env.example
+!frontend/.env.example
 
 # =========================
 # Node / React
