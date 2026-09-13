@@ -1,9 +1,17 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+let rawBase = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1').trim()
+
+// Strip any trailing slashes
+rawBase = rawBase.replace(/\/+$/, '')
+
+// Automatically append /api/v1 if omitted in Vercel/hosting env
+if (!rawBase.endsWith('/api/v1')) {
+  rawBase = `${rawBase}/api/v1`
+}
 
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: rawBase,
   headers: { 'Content-Type': 'application/json' }
 })
 
