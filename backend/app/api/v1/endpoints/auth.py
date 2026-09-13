@@ -20,7 +20,7 @@ def ensure_default_admin_exists():
         user = DatabaseRepository.get_user_by_email("admin@business.com")
 
         if not user:
-            print("No admin found. Creating default admin...")
+            print("[AUTH] No admin found. Creating default admin...")
 
             hashed = hash_password("adminpassword")
 
@@ -30,10 +30,10 @@ def ensure_default_admin_exists():
                 role="admin",
             )
 
-            print("✅ Default admin created.")
+            print("[AUTH] Default admin created successfully.")
 
     except Exception as e:
-        print(f"❌ Failed to seed admin: {e}")
+        print(f"[AUTH] Failed to seed admin: {e}")
 
 
 # Run once on startup
@@ -49,37 +49,28 @@ async def login(payload: UserLogin):
     ensure_default_admin_exists()
 
     try:
-
         user = DatabaseRepository.get_user_by_email(payload.email)
 
-        print("\n" + "=" * 70)
-        print("LOGIN ATTEMPT")
-        print("=" * 70)
-        print("Email:", payload.email)
-        print("Password:", payload.password)
-        print("Password Length:", len(payload.password))
-        print("User Found:", user is not None)
+        print("\n" + "=" * 50)
+        print(f"[AUTH] Login attempt for: {payload.email}")
+        print(f"[AUTH] User found in DB: {user is not None}")
 
         if not user:
-            print("❌ User not found")
+            print("[AUTH] Login failed: User not found")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
             )
-
-        print("Role:", user.get("role"))
-        print("Hash:", user.get("password_hash"))
-        print("Hash Length:", len(user.get("password_hash", "")))
-        print("=" * 70)
 
         valid = verify_password(
             payload.password,
             user["password_hash"],
         )
 
-        print("Password Verification:", valid)
+        print(f"[AUTH] Password valid: {valid}")
 
         if not valid:
+            print("[AUTH] Login failed: Password mismatch")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
@@ -92,8 +83,8 @@ async def login(payload: UserLogin):
             }
         )
 
-        print("✅ Login Successful")
-        print("=" * 70)
+        print("[AUTH] Login successful. Access token generated.")
+        print("=" * 50 + "\n")
 
         return {
             "access_token": access_token,
@@ -105,14 +96,9 @@ async def login(payload: UserLogin):
         raise
 
     except Exception as e:
-
-        print("\n")
-        print("=" * 70)
-        print("LOGIN ERROR")
-        print(type(e).__name__)
-        print(str(e))
-        print("=" * 70)
-        print("\n")
+        print("\n" + "=" * 50)
+        print(f"[AUTH ERROR] {type(e).__name__}: {str(e)}")
+        print("=" * 50 + "\n")
 
         raise HTTPException(
             status_code=500,

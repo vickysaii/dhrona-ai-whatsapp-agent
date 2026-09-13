@@ -20,7 +20,13 @@ export default function Login() {
       await login(email, password)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed. Check credentials.')
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail)
+      } else if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+        setError('Cannot connect to backend server. Make sure the FastAPI backend is running on port 8000.')
+      } else {
+        setError('Login failed. Check credentials or backend status.')
+      }
     } finally {
       setLoading(false)
     }
